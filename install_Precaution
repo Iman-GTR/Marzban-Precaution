@@ -48,7 +48,7 @@ fi
 # سوال برای آپدیت پنل Marzban
 read -p "Do you want to update the Marzban panel? (y/n): " confirm_update
 if [[ "$confirm_update" == "y" ]]; then
-    Marzban Update &
+    Marzban Update
     sleep 40
     echo "Update completed. If you need to restore the zip files, please run the script again."
 fi
