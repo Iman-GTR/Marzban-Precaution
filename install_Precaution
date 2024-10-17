@@ -11,16 +11,16 @@ fi
 read -p "Do you want to see the disk usage before zipping the MARZBAN files? (y/n): " confirm_disk_usage
 if [[ "$confirm_disk_usage" == "y" ]]; then
     wget -qO- bench.sh | bash
-    sleep 10
+    sleep 7
 fi
 
 echo -e "\033[1mShowing disk usage for: /opt/marzban\033[0m"
 du -sh /opt/marzban
-sleep 5
+sleep 2
 
 echo -e "\033[1mShowing disk usage for: /var/lib/marzban\033[0m"
 du -sh /var/lib/marzban
-sleep 5
+sleep 1
 
 read -p "Do you want to create a zip file for the displayed directories? (y/n): " confirm_zip
 if [[ "$confirm_zip" == "y" ]]; then
