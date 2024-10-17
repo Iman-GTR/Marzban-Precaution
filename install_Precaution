@@ -16,20 +16,20 @@ read -p "Do you want to see the disk usage before zipping the MARZBAN files? (y/
 if [[ "$confirm_disk_usage" == "y" ]]; then
     # نمایش حجم کل دیسک و فضای خالی
     df -BG --total | grep 'total' | awk '{print "Total Disk Size: " $2 "\nFree Disk Space: " $4}'
-    sleep 2
+    sleep 1
 fi
 
 # محاسبه فضای پوشه /opt/marzban
 opt_size=$(du -sB1 /opt/marzban | awk '{print $1}')
 echo -e "\033[1mShowing disk usage for: /opt/marzban\033[0m"
 du -sh /opt/marzban
-sleep 2
+sleep 1
 
 # محاسبه فضای پوشه /var/lib/marzban
 lib_size=$(du -sB1 /var/lib/marzban | awk '{print $1}')
 echo -e "\033[1mShowing disk usage for: /var/lib/marzban\033[0m"
 du -sh /var/lib/marzban
-sleep 2
+sleep 1
 
 # محاسبه فضای خالی دیسک
 free_space=$(df --output=avail / | tail -n1)
@@ -68,8 +68,8 @@ if [[ "$confirm_update" == "y" ]]; then
     cd /
 
     # اجرای دستور آپدیت پنل Marzban
-    marzban update &
-    sleep 40
+    marzban update
+    sleep 30
     echo "Update completed. If you need to restore the zip files, please run the script again."
 fi
 
