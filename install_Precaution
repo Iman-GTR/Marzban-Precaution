@@ -16,7 +16,7 @@ read -p "Do you want to see the disk usage before zipping the MARZBAN files? (y/
 if [[ "$confirm_disk_usage" == "y" ]]; then
     # نمایش حجم کل دیسک و فضای خالی
     df -BG --total | grep 'total' | awk '{print "Total Disk Size: " $2 "\nFree Disk Space: " $4}'
-    sleep 5
+    sleep 2
 fi
 
 # محاسبه فضای پوشه /opt/marzban
