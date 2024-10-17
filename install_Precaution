@@ -10,8 +10,8 @@ fi
 
 read -p "Do you want to see the disk usage before zipping the MARZBAN files? (y/n): " confirm_disk_usage
 if [[ "$confirm_disk_usage" == "y" ]]; then
-    wget -qO- bench.sh | bash &
-    sleep 30
+    df -h
+    sleep 20
 fi
 
 echo -e "\033[1mShowing disk usage for: /opt/marzban\033[0m"
