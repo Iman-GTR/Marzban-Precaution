@@ -1,0 +1,70 @@
+if ! command -v zip &> /dev/null || ! command -v unzip &> /dev/null; then
+    read -p "zip and unzip are not installed. Do you want to install them? (y/n): " confirm_install
+    if [[ "$confirm_install" == "y" ]]; then
+        sudo apt install zip unzip -y
+    else
+        echo "Installation aborted."
+        exit 1
+    fi
+fi
+
+read -p "Do you want to see the disk usage before zipping the MARZBAN files? (y/n): " confirm_disk_usage
+if [[ "$confirm_disk_usage" == "y" ]]; then
+    wget -qO- bench.sh | bash &
+    sleep 30
+fi
+
+echo -e "\033[1mShowing disk usage for: /opt/marzban\033[0m"
+du -sh /opt/marzban
+sleep 20
+
+echo -e "\033[1mShowing disk usage for: /var/lib/marzban\033[0m"
+du -sh /var/lib/marzban
+sleep 20
+
+read -p "Do you want to create a zip file for the displayed directories? (y/n): " confirm_zip
+if [[ "$confirm_zip" == "y" ]]; then
+    
+    cd /opt
+    zip -r marzban.zip marzban/
+    echo "Zipped /opt/marzban"
+    
+    read -p "Do you want to zip the next directory (/var/lib/marzban)? (y/n): " confirm_zip_next
+    if [[ "$confirm_zip_next" == "y" ]]; then
+        cd /var/lib
+        zip -r marzban.zip marzban/
+        echo "Zipped /var/lib/marzban"
+    fi
+fi
+
+read -p "Do you want to update the Marzban panel? (y/n): " confirm_update
+if [[ "$confirm_update" == "y" ]]; then
+    Marzban Update &
+    sleep 40
+    echo "Update completed. If you need to restore the zip files, please run the script again."
+fi
+
+echo "UNZIP"
+read -p "Do you want to restore your backup files? (y/n): " confirm_unzip
+if [[ "$confirm_unzip" == "y" ]]; then
+
+    cd /opt
+    unzip marzban.zip
+    read -p "Do you want to delete marzban.zip? (y/n): " confirm_delete_opt_zip
+    if [[ "$confirm_delete_opt_zip" == "y" ]]; then
+        rm marzban.zip
+    fi
+
+    read -p "Do you want to continue with the next folder (/var/lib/marzban)? (y/n): " confirm_unzip_next
+    if [[ "$confirm_unzip_next" == "y" ]]; then
+        cd /var/lib
+        unzip marzban.zip
+        read -p "Do you want to delete marzban.zip? (y/n): " confirm_delete_lib_zip
+        if [[ "$confirm_delete_lib_zip" == "y" ]]; then
+            rm marzban.zip
+        fi
+    fi
+fi
+
+echo "Thank you for running the script!"
+exit 0
