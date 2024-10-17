@@ -68,7 +68,7 @@ if [[ "$confirm_update" == "y" ]]; then
     cd /
 
     # اجرای دستور آپدیت پنل Marzban
-    Marzban Update &
+    marzban update &
     sleep 40
     echo "Update completed. If you need to restore the zip files, please run the script again."
 fi
