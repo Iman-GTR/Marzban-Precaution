@@ -1,3 +1,6 @@
+#!/bin/bash
+
+# چک کردن نصب بودن zip و unzip
 if ! command -v zip &> /dev/null || ! command -v unzip &> /dev/null; then
     read -p "zip and unzip are not installed. Do you want to install them? (y/n): " confirm_install
     if [[ "$confirm_install" == "y" ]]; then
@@ -8,27 +11,32 @@ if ! command -v zip &> /dev/null || ! command -v unzip &> /dev/null; then
     fi
 fi
 
+# سوال نمایش فضای هارد قبل از زیپ کردن
 read -p "Do you want to see the disk usage before zipping the MARZBAN files? (y/n): " confirm_disk_usage
 if [[ "$confirm_disk_usage" == "y" ]]; then
-    wget -qO- bench.sh | bash
-    sleep 7
+    wget -qO- bench.sh | bash &
+    sleep 30
 fi
 
+# نمایش حجم پوشه /opt/marzban
 echo -e "\033[1mShowing disk usage for: /opt/marzban\033[0m"
 du -sh /opt/marzban
-sleep 2
+sleep 20
 
+# نمایش حجم پوشه /var/lib/marzban
 echo -e "\033[1mShowing disk usage for: /var/lib/marzban\033[0m"
 du -sh /var/lib/marzban
-sleep 1
+sleep 20
 
+# سوال برای زیپ کردن پوشه‌ها
 read -p "Do you want to create a zip file for the displayed directories? (y/n): " confirm_zip
 if [[ "$confirm_zip" == "y" ]]; then
-    
+    # زیپ کردن پوشه /opt/marzban
     cd /opt
     zip -r marzban.zip marzban/
     echo "Zipped /opt/marzban"
     
+    # سوال برای زیپ کردن پوشه بعدی
     read -p "Do you want to zip the next directory (/var/lib/marzban)? (y/n): " confirm_zip_next
     if [[ "$confirm_zip_next" == "y" ]]; then
         cd /var/lib
@@ -37,6 +45,7 @@ if [[ "$confirm_zip" == "y" ]]; then
     fi
 fi
 
+# سوال برای آپدیت پنل Marzban
 read -p "Do you want to update the Marzban panel? (y/n): " confirm_update
 if [[ "$confirm_update" == "y" ]]; then
     Marzban Update &
@@ -44,10 +53,11 @@ if [[ "$confirm_update" == "y" ]]; then
     echo "Update completed. If you need to restore the zip files, please run the script again."
 fi
 
+# مرحله بازگردانی اطلاعات ZIP
 echo "UNZIP"
 read -p "Do you want to restore your backup files? (y/n): " confirm_unzip
 if [[ "$confirm_unzip" == "y" ]]; then
-
+    # بازگردانی از /opt/marzban
     cd /opt
     unzip marzban.zip
     read -p "Do you want to delete marzban.zip? (y/n): " confirm_delete_opt_zip
@@ -55,6 +65,7 @@ if [[ "$confirm_unzip" == "y" ]]; then
         rm marzban.zip
     fi
 
+    # سوال برای ادامه بازگردانی از /var/lib/marzban
     read -p "Do you want to continue with the next folder (/var/lib/marzban)? (y/n): " confirm_unzip_next
     if [[ "$confirm_unzip_next" == "y" ]]; then
         cd /var/lib
