@@ -11,50 +11,48 @@ if ! command -v zip &> /dev/null || ! command -v unzip &> /dev/null; then
     fi
 fi
 
-# نمایش حجم کل دیسک و فضای خالی
-total_space=$(df / --output=size | tail -n1 | awk '{print $1}')
-free_space=$(df / --output=avail | tail -n1 | awk '{print $1}')
-
-# تبدیل به GB
-total_space_gb=$((total_space / 1024 / 1024))
-free_space_gb=$((free_space / 1024 / 1024))
-
-echo "Total Disk Size: ${total_space_gb}G"
-echo "Free Disk Space: ${free_space_gb}G"
-
-# گرفتن حجم پوشه‌ها
+# گرفتن حجم پوشه /opt/marzban
 opt_marzban_size=$(du -s /opt/marzban | awk '{print $1}')
-lib_marzban_size=$(du -s /var/lib/marzban | awk '{print $1}')
-
-# محاسبه اندازه پوشه‌ها به GB
 opt_marzban_size_gb=$((opt_marzban_size / 1024 / 1024))
+
+# گرفتن حجم پوشه /var/lib/marzban
+lib_marzban_size=$(du -s /var/lib/marzban | awk '{print $1}')
 lib_marzban_size_gb=$((lib_marzban_size / 1024 / 1024))
 
+# جمع حجم پوشه‌های /opt/marzban و /var/lib/marzban
 total_marzban_size_gb=$((opt_marzban_size_gb + lib_marzban_size_gb))
-
 echo "Total MARZBAN Files Size: ${total_marzban_size_gb}G"
 
-# بررسی کافی بودن فضای دیسک برای عملیات زیپ
-if [[ $free_space_gb -lt $total_marzban_size_gb ]]; then
-    echo "There is not enough space for ZIP/UNZIP operations."
-    exit 1
-else
+# اجرای bench.sh برای بررسی فضای کلی و خالی دیسک
+echo "Checking total disk size and free space..."
+disk_info=$(wget -qO- bench.sh | bash | grep -E 'Disk|Avail' | head -n 2)
+
+# گرفتن فضای دیسک خالی از خروجی bench.sh
+free_disk_space_gb=$(echo "$disk_info" | awk 'NR==2 {print $4}' | sed 's/G//')
+
+# مقایسه فضای خالی با حجم فایل‌های مرزبان
+if (( free_disk_space_gb > total_marzban_size_gb )); then
     echo "There is enough space. Continuing with zip and unzip operations."
+else
+    echo "There is not enough space to continue with zip and unzip operations. Exiting..."
+    exit 1
 fi
 
-# ادامه زیپ و آنزیپ
+# سوال برای زیپ کردن پوشه‌ها
 read -p "Do you want to create a zip file for the displayed directories? (y/n): " confirm_zip
 if [[ "$confirm_zip" == "y" ]]; then
+    # زیپ کردن پوشه /opt/marzban
     cd /opt
     zip -r marzban.zip marzban/
     echo "Zipped /opt/marzban"
     
+    # زیپ کردن پوشه /var/lib/marzban
     cd /var/lib
     zip -r marzban.zip marzban/
     echo "Zipped /var/lib/marzban"
 fi
 
-# آپدیت پنل Marzban
+# سوال برای آپدیت پنل Marzban
 read -p "Do you want to update the Marzban panel? (y/n): " confirm_update
 if [[ "$confirm_update" == "y" ]]; then
     cd /
