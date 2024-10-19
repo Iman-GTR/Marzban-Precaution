@@ -11,63 +11,55 @@ if ! command -v zip &> /dev/null || ! command -v unzip &> /dev/null; then
     fi
 fi
 
-# سوال نمایش فضای هارد قبل از زیپ کردن
-read -p "Do you want to see the disk usage before zipping the MARZBAN files? (y/n): " confirm_disk_usage
-if [[ "$confirm_disk_usage" == "y" ]]; then
-    # نمایش حجم کل دیسک و فضای خالی
-    df -BG --total | grep 'total' | awk '{print "Total Disk Size: " $2 "\nFree Disk Space: " $4}'
-    sleep 1
-fi
+# نمایش حجم کل دیسک و فضای خالی
+total_space=$(df / --output=size | tail -n1 | awk '{print $1}')
+free_space=$(df / --output=avail | tail -n1 | awk '{print $1}')
 
-# محاسبه فضای پوشه /opt/marzban
-opt_size=$(du -sB1 /opt/marzban | awk '{print $1}')
-echo -e "\033[1mShowing disk usage for: /opt/marzban\033[0m"
-du -sh /opt/marzban
-sleep 1
+# تبدیل به GB
+total_space_gb=$((total_space / 1024 / 1024))
+free_space_gb=$((free_space / 1024 / 1024))
 
-# محاسبه فضای پوشه /var/lib/marzban
-lib_size=$(du -sB1 /var/lib/marzban | awk '{print $1}')
-echo -e "\033[1mShowing disk usage for: /var/lib/marzban\033[0m"
-du -sh /var/lib/marzban
-sleep 1
+echo "Total Disk Size: ${total_space_gb}G"
+echo "Free Disk Space: ${free_space_gb}G"
 
-# محاسبه فضای خالی دیسک
-free_space=$(df --output=avail / | tail -n1)
-echo "Available Disk Space: $(($free_space / 1024 / 1024)) GB"
+# گرفتن حجم پوشه‌ها
+opt_marzban_size=$(du -s /opt/marzban | awk '{print $1}')
+lib_marzban_size=$(du -s /var/lib/marzban | awk '{print $1}')
 
-# محاسبه مجموع فضای پوشه‌های مارزبان
-total_marzban_size=$(($opt_size + $lib_size))
-echo "Total Marzban Files Size: $(($total_marzban_size / 1024 / 1024)) GB"
+# محاسبه اندازه پوشه‌ها به GB
+opt_marzban_size_gb=$((opt_marzban_size / 1024 / 1024))
+lib_marzban_size_gb=$((lib_marzban_size / 1024 / 1024))
 
-# بررسی اینکه آیا فضای کافی برای عملیات zip/unzip وجود دارد
-if [[ $free_space -lt $total_marzban_size ]]; then
-    echo "There is not enough space to perform zip and unzip operations. Aborting."
+total_marzban_size_gb=$((opt_marzban_size_gb + lib_marzban_size_gb))
+
+echo "Total MARZBAN Files Size: ${total_marzban_size_gb}G"
+
+# بررسی کافی بودن فضای دیسک برای عملیات زیپ
+if [[ $free_space_gb -lt $total_marzban_size_gb ]]; then
+    echo "There is not enough space for ZIP/UNZIP operations."
     exit 1
 else
     echo "There is enough space. Continuing with zip and unzip operations."
 fi
 
-# سوال برای زیپ کردن پوشه‌ها
+# ادامه زیپ و آنزیپ
 read -p "Do you want to create a zip file for the displayed directories? (y/n): " confirm_zip
 if [[ "$confirm_zip" == "y" ]]; then
-    # زیپ کردن پوشه /opt/marzban
     cd /opt
     zip -r marzban.zip marzban/
     echo "Zipped /opt/marzban"
     
-    # زیپ کردن پوشه /var/lib/marzban
     cd /var/lib
     zip -r marzban.zip marzban/
     echo "Zipped /var/lib/marzban"
 fi
 
-# سوال برای آپدیت پنل Marzban
+# آپدیت پنل Marzban
 read -p "Do you want to update the Marzban panel? (y/n): " confirm_update
 if [[ "$confirm_update" == "y" ]]; then
-    # تغییر مسیر به ریشه (root)
-    cd
+    cd /
     marzban update
-
+    sleep 40
     echo "Update completed. If you need to restore the zip files, please run the script again."
 fi
 
@@ -75,22 +67,13 @@ fi
 echo "UNZIP"
 read -p "Do you want to restore your backup files? (y/n): " confirm_unzip
 if [[ "$confirm_unzip" == "y" ]]; then
-    # بازگردانی از /opt/marzban
     cd /opt
     unzip marzban.zip
-    # بازگردانی از /var/lib/marzban
+    rm marzban.zip
+
     cd /var/lib
     unzip marzban.zip
-
-    # سوال برای حذف فایل‌های ZIP پس از بازگردانی
-    read -p "Do you want to delete all zip files after extraction? (y/n): " confirm_delete_all_zip
-    if [[ "$confirm_delete_all_zip" == "y" ]]; then
-        rm /opt/marzban.zip
-        rm /var/lib/marzban.zip
-        echo "All zip files have been deleted."
-    else
-        echo "Zip files have not been deleted."
-    fi
+    rm marzban.zip
 fi
 
 echo "Thank you for running the script!"
