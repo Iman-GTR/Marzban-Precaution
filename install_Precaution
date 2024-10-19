@@ -17,7 +17,7 @@ if [[ "$confirm_check_space" == "y" ]]; then
     # نمایش حجم کل دیسک و فضای خالی
     echo "Collecting disk usage information..."
     wget -qO- bench.sh | bash  # اجرای دستور
-    sleep 7  # منتظر ماندن به مدت ۷ ثانیه
+    sleep 0
     echo "Disk usage information collected."
 fi
 
