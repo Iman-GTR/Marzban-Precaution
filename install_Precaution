@@ -23,15 +23,16 @@ lib_marzban_size_gb=$((lib_marzban_size / 1024 / 1024))
 total_marzban_size_gb=$((opt_marzban_size_gb + lib_marzban_size_gb))
 echo "Total MARZBAN Files Size: ${total_marzban_size_gb}G"
 
-# اجرای bench.sh برای بررسی فضای کلی و خالی دیسک
-echo "Checking total disk size and free space..."
-disk_info=$(wget -qO- bench.sh | bash | grep -E 'Disk|Avail' | head -n 2)
+# محاسبه فضای کل و فضای خالی دیسک با استفاده از df
+disk_info=$(df -BG --total | grep 'total')
+total_disk_size=$(echo "$disk_info" | awk '{print $2}' | sed 's/G//')
+free_disk_space=$(echo "$disk_info" | awk '{print $4}' | sed 's/G//')
 
-# گرفتن فضای دیسک خالی از خروجی bench.sh
-free_disk_space_gb=$(echo "$disk_info" | awk 'NR==2 {print $4}' | sed 's/G//')
+echo "Total Disk Size: ${total_disk_size}G"
+echo "Free Disk Space: ${free_disk_space}G"
 
 # مقایسه فضای خالی با حجم فایل‌های مرزبان
-if (( free_disk_space_gb > total_marzban_size_gb )); then
+if (( free_disk_space > total_marzban_size_gb )); then
     echo "There is enough space. Continuing with zip and unzip operations."
 else
     echo "There is not enough space to continue with zip and unzip operations. Exiting..."
@@ -55,7 +56,7 @@ fi
 # سوال برای آپدیت پنل Marzban
 read -p "Do you want to update the Marzban panel? (y/n): " confirm_update
 if [[ "$confirm_update" == "y" ]]; then
-    cd
+    cd /
     marzban update
     sleep 40
     echo "Update completed. If you need to restore the zip files, please run the script again."
