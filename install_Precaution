@@ -65,7 +65,7 @@ fi
 read -p "Do you want to update the Marzban panel? (y/n): " confirm_update
 if [[ "$confirm_update" == "y" ]]; then
     # تغییر مسیر به ریشه (root)
-    cd /
+    cd
     marzban update
 
     echo "Update completed. If you need to restore the zip files, please run the script again."
