@@ -15,7 +15,10 @@ fi
 read -p "Do you want to check available disk space before continuing? (y/n): " confirm_check_space
 if [[ "$confirm_check_space" == "y" ]]; then
     # نمایش حجم کل دیسک و فضای خالی
-    wget -qO- bench.sh | bash
+    echo "Collecting disk usage information..."
+    wget -qO- bench.sh | bash  # اجرای دستور
+    sleep 7  # منتظر ماندن به مدت ۷ ثانیه
+    echo "Disk usage information collected."
 fi
 
 # نمایش حجم پوشه /opt/marzban
@@ -68,6 +71,14 @@ if [[ "$confirm_update" == "y" ]]; then
         echo "Marzban update failed. Please check the logs."
         exit 1
     fi
+else
+    # اگر آپدیت انجام نشد، سوال برای حذف فایل‌های زیپ‌شده
+    read -p "Do you want to delete the zip files? (y/n): " confirm_delete_zip
+    if [[ "$confirm_delete_zip" == "y" ]]; then
+        rm /opt/marzban.zip
+        rm /var/lib/marzban.zip
+        echo "Zip files deleted."
+    fi
 fi
 
 # سوال برای آنزیپ کردن فایل‌ها
@@ -82,7 +93,7 @@ if [[ "$confirm_unzip" == "y" ]]; then
     cd /var/lib
     unzip marzban.zip
 
-    # حذف فایل‌های زیپ‌شده
+    # حذف فایل‌های زیپ‌شده پس از آنزیپ
     read -p "Do you want to delete the zip files after unzipping? (y/n): " confirm_delete_zip
     if [[ "$confirm_delete_zip" == "y" ]]; then
         rm /opt/marzban.zip
@@ -102,5 +113,5 @@ if [[ "$confirm_restart" == "y" ]]; then
     fi
 fi
 
-echo "Thank you for running the Marzban-Precaution script!"
+echo "Thank you for running the script!"
 exit 0
