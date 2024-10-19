@@ -72,46 +72,17 @@ if [[ "$confirm_update" == "y" ]]; then
         exit 1
     fi
 else
-    # اگر آپدیت انجام نشد، سوال برای حذف فایل‌های زیپ‌شده
-    read -p "Do you want to delete the zip files? (y/n): " confirm_delete_zip
-    if [[ "$confirm_delete_zip" == "y" ]]; then
-        rm /opt/marzban.zip
-        rm /var/lib/marzban.zip
-        echo "Zip files deleted."
-    fi
+    echo "Skipping Marzban update."
 fi
 
-# سوال برای آنزیپ کردن فایل‌ها
-echo "UNZIP"
-read -p "Do you want to restore your backup files? (y/n): " confirm_unzip
-if [[ "$confirm_unzip" == "y" ]]; then
-    # بازگردانی از /opt/marzban
-    cd /opt
-    unzip marzban.zip
-
-    # بازگردانی از /var/lib/marzban
-    cd /var/lib
-    unzip marzban.zip
-
-    # حذف فایل‌های زیپ‌شده پس از آنزیپ
-    read -p "Do you want to delete the zip files after unzipping? (y/n): " confirm_delete_zip
-    if [[ "$confirm_delete_zip" == "y" ]]; then
-        rm /opt/marzban.zip
-        rm /var/lib/marzban.zip
-        echo "Zip files deleted."
-    fi
+# سوال برای حذف فایل‌های زیپ‌شده
+read -p "Do you want to delete the zip files? (y/n): " confirm_delete_zip
+if [[ "$confirm_delete_zip" == "y" ]]; then
+    rm /opt/marzban.zip
+    rm /var/lib/marzban.zip
+    echo "Zip files deleted."
 fi
 
-# سوال برای ری‌استارت پنل Marzban
-read -p "Do you want to restart the Marzban panel? (y/n): " confirm_restart
-if [[ "$confirm_restart" == "y" ]]; then
-    marzban restart
-    if [[ $? -eq 0 ]]; then
-        echo "Marzban panel restarted successfully."
-    else
-        echo "Failed to restart Marzban panel. Please check the logs."
-    fi
-fi
-
+# پایان اسکریپت و تشکر از کاربر
 echo "Thank you for running the script!"
 exit 0
