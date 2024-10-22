@@ -14,11 +14,12 @@ fi
 # سوال برای نمایش فضای خالی هارد
 read -p "Do you want to check available disk space before continuing? (y/n): " confirm_check_space
 if [[ "$confirm_check_space" == "y" ]]; then
-    # نمایش حجم کل دیسک و فضای خالی
-    echo "Collecting disk usage information..."
-    wget -qO- bench.sh | bash  # اجرای دستور
-    sleep 0
-    echo "Disk usage information collected."
+    # محاسبه حجم کل و فضای خالی دیسک
+    echo "Checking total disk space and available free space..."
+    total_space=$(df -h --output=size / | tail -n1)   # حجم کل دیسک
+    free_space=$(df -h --output=avail / | tail -n1)   # فضای خالی دیسک
+    echo "Total disk space: $total_space"
+    echo "Available free space: $free_space"
 fi
 
 # نمایش حجم پوشه /opt/marzban
@@ -33,11 +34,12 @@ size_var=$(du -sh /var/lib/marzban | cut -f1)
 du -sh /var/lib/marzban
 sleep 1
 
-# محاسبه فضای کافی برای زیپ و آنزیپ
+# محاسبه فضای موردنیاز برای زیپ و آنزیپ
+echo "Calculating required space for zip/unzip..."
 total_size=$(echo $size_opt + $size_var | bc)
-free_space=$(df --output=avail / | tail -n1)
+free_space_bytes=$(df --output=avail / | tail -n1)
 
-if [[ $total_size -ge $free_space ]]; then
+if [[ $total_size -ge $free_space_bytes ]]; then
     echo "There is not enough space to proceed with zip and unzip operations."
     exit 1
 else
@@ -71,8 +73,6 @@ if [[ "$confirm_update" == "y" ]]; then
         echo "Marzban update failed. Please check the logs."
         exit 1
     fi
-else
-    echo "Skipping Marzban update."
 fi
 
 # سوال برای حذف فایل‌های زیپ‌شده
@@ -83,6 +83,36 @@ if [[ "$confirm_delete_zip" == "y" ]]; then
     echo "Zip files deleted."
 fi
 
-# پایان اسکریپت و تشکر از کاربر
+# سوال برای آنزیپ کردن فایل‌ها
+read -p "Do you want to restore your backup files? (y/n): " confirm_unzip
+if [[ "$confirm_unzip" == "y" ]]; then
+    # بازگردانی از /opt/marzban
+    cd /opt
+    unzip marzban.zip
+
+    # بازگردانی از /var/lib/marzban
+    cd /var/lib
+    unzip marzban.zip
+
+    # حذف فایل‌های زیپ‌شده پس از آنزیپ
+    read -p "Do you want to delete the zip files after unzipping? (y/n): " confirm_delete_zip
+    if [[ "$confirm_delete_zip" == "y" ]]; then
+        rm /opt/marzban.zip
+        rm /var/lib/marzban.zip
+        echo "Zip files deleted."
+    fi
+fi
+
+# سوال برای ری‌استارت پنل Marzban
+read -p "Do you want to restart the Marzban panel? (y/n): " confirm_restart
+if [[ "$confirm_restart" == "y" ]]; then
+    marzban restart
+    if [[ $? -eq 0 ]]; then
+        echo "Marzban panel restarted successfully."
+    else
+        echo "Failed to restart Marzban panel. Please check the logs."
+    fi
+fi
+
 echo "Thank you for running the script!"
 exit 0
