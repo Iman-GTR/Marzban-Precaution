@@ -99,12 +99,17 @@ fi
 read -p "Do you want to restart the Marzban panel? (y/n): " confirm_restart
 if [[ "$confirm_restart" == "y" ]]; then
     marzban restart
+    # منتظر پایان اجرای دستور marzban restart
     if [[ $? -eq 0 ]]; then
         echo "Marzban panel restarted successfully."
+        echo "Thank you for running the script!"
+        exit 0
     else
         echo "Failed to restart Marzban panel. Please check the logs."
+        exit 1
     fi
+else
+    echo "Skipping Marzban restart."
+    echo "Thank you for running the script!"
+    exit 0
 fi
-
-echo "Thank you for running the script!"
-exit 0
