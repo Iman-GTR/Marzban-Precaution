@@ -75,14 +75,6 @@ if [[ "$confirm_update" == "y" ]]; then
     fi
 fi
 
-# سوال برای حذف فایل‌های زیپ‌شده
-read -p "Do you want to delete the zip files? (y/n): " confirm_delete_zip
-if [[ "$confirm_delete_zip" == "y" ]]; then
-    rm /opt/marzban.zip
-    rm /var/lib/marzban.zip
-    echo "Zip files deleted."
-fi
-
 # سوال برای آنزیپ کردن فایل‌ها
 read -p "Do you want to restore your backup files? (y/n): " confirm_unzip
 if [[ "$confirm_unzip" == "y" ]]; then
@@ -93,14 +85,14 @@ if [[ "$confirm_unzip" == "y" ]]; then
     # بازگردانی از /var/lib/marzban
     cd /var/lib
     unzip marzban.zip
+fi
 
-    # حذف فایل‌های زیپ‌شده پس از آنزیپ
-    read -p "Do you want to delete the zip files after unzipping? (y/n): " confirm_delete_zip
-    if [[ "$confirm_delete_zip" == "y" ]]; then
-        rm /opt/marzban.zip
-        rm /var/lib/marzban.zip
-        echo "Zip files deleted."
-    fi
+# حذف فایل‌های زیپ‌شده (صرف نظر از آنزیپ)
+read -p "Do you want to delete the zip files? (y/n): " confirm_delete_zip
+if [[ "$confirm_delete_zip" == "y" ]]; then
+    rm /opt/marzban.zip
+    rm /var/lib/marzban.zip
+    echo "Zip files deleted."
 fi
 
 # سوال برای ری‌استارت پنل Marzban
